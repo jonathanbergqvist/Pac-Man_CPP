@@ -1,3 +1,4 @@
+#include "Game.h"
 #include "Ghost.h"
 
 Ghost::Ghost(char colour) : GHOST_COLOUR(colour) {

@@ -6,25 +6,16 @@
 
 using namespace std;
 
-// Function to display the grid
-void Game::displayGrid() const {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Yellow
-
-
-	for (int y = 0; y < GRID_HEIGHT; ++y) {
-		for (int x = 0; x < GRID_WIDTH; ++x) {
-			cout << grid[y][x];
-		}
-		cout << endl;
-	}
-}
-
 void Game::playGame() {
 	bool gameOver = false;
 
+	// Initial placement of Pac-Man
+	grid[pacMan.pacmanY][pacMan.pacmanX] = pacMan.PACMAN_CHAR;
+	
 	while (!gameOver) {
-		getPlayerInput();
+		displayGrid();
+		pacMan.movePacMan(grid);
+
 		gameOver = checkIfBoardIsComplete();
 		// TODO: Check if hit by ghost.
 	}
@@ -33,75 +24,43 @@ void Game::playGame() {
 
 }
 
-void Game::showGameOverScreen() {
+// Display the game board grid
+void Game::displayGrid() const {
 	system("cls"); // Clear the console.
+
+	// Set the colour of the entire board to yellow, including Pac-Man and Ghosts.
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Yellow
+
+	for (int y = 0; y < GRID_Y; ++y) {
+		for (int x = 0; x < GRID_X; ++x) {
+			cout << Game::grid[y][x];
+		}
+		cout << endl;
+	}
+}
+
+void Game::showGameOverScreen() const {
 	displayGrid();
 	cout << "GAME OVER" << endl;
 }
 
-void Game::getPlayerInput() {
-	char input;
-
-	system("cls"); // Clear the console.
-
-	// Initial placement of Pac-Man
-	grid[pacmanY][pacmanX] = PACMAN;
-
-	// Display the grid
-	displayGrid();
-
-	// Get user input
-	input = _getch();
-
-	char currentPositionX = pacmanX;
-	char currentPositionY = pacmanY;
-
-	// Update Pac-Man's position based on input
-	switch (input) {
-	case 'w':
-		pacmanY--;
-		break;
-	case 's':
-		pacmanY++;
-		break;
-	case 'a':
-		pacmanX--;
-		break;
-	case 'd':
-		pacmanX++;
-		break;
-	case 'q':
-		exit(0); // Quit the game
-	}
-
-	// Update Pac-Man's position in the grid only if a valid input, i.e. not into a wall.
-	if (checkValidUserInput()) {
-		grid[pacmanY][pacmanX] = PACMAN;
-		grid[currentPositionY][currentPositionX] = EMPTY;
-	}
-	else {
-		// Reset the position of Pac-Man to the position before used selected direction.
-		pacmanX = currentPositionX;
-		pacmanY = currentPositionY;
-	}
-
-}
-
-bool Game::checkValidUserInput() const {
-	return grid[pacmanY][pacmanX] != WALL;
+bool Game::checkValidMovement(char wantedLocation) {
+	return wantedLocation != Game::WALL;
 }
 
 bool Game::checkIfBoardIsComplete() const {
 	// Check if there are no DOTs or BIG_DOTs left on the game board.
-	for (int y = 0; y < GRID_HEIGHT; ++y) {
-		for (int x = 0; x < GRID_WIDTH; ++x) {
+	for (int y = 0; y < GRID_Y; ++y) {
+		for (int x = 0; x < GRID_X; ++x) {
 			if (grid[y][x] == DOT || grid[y][x] == BIG_DOT) {
 				return false; // Character found
 			}
 		}
 	}
 	return true; // Character not found
-	// TODO: Replace with another methodology when ghosts are added, as they will "hide" the dots.
+	// TODO: Replace with another methodology when ghosts are added, as they will "hide" the dots, 
+	// e.g. have the total number of dots known and count available dots.
 }
 
 
@@ -111,14 +70,7 @@ Game::Game() :
 	ghostOrange('o'), 
 	ghostRed('r'), 
 	ghostPink('p'), 
-	ghostCyan('c'),
-	PACMAN(pacMan.PACMAN_CHAR), 
-	WALL('#'), 
-	DOT('.'), 
-	BIG_DOT('*'), 
-	EMPTY(' '),
-	pacmanX(1), 
-	pacmanY(1)
+	ghostCyan('c')
 {
 	playGame();
 }
