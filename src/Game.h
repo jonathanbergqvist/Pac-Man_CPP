@@ -9,22 +9,16 @@ class Game {
 	char grid[GRID_Y][GRID_X] = {
 		"#####################",
 		"#...................#",
-		//"#.##.###.###.###.##.#",
-		//"#...................#",
-		//"#.##.#.#####.#.##.#.#",
-		//"#....#.......#......#",
-		//"#.##.#.##.##.#.##.#.#",
-		//"#...................#",
-		//"#.##.###.###.###.##.#",
-		//"#...................#",
+		"#.##.###.###.###.##.#",
+		"#...................#",
+		"#.##.#.#####.#.##.#.#",
+		"#....#.......#......#",
+		"#.##.#.##.##.#.##.#.#",
+		"#...................#",
+		"#.##.###.###.###.##.#",
+		"#...................#",
 		"#####################"
 	};
-
-	PacMan pacMan;
-	Ghost ghostOrange;
-	Ghost ghostRed;
-	Ghost ghostPink;
-	Ghost ghostCyan;
 
 	static const char WALL = '#';
 	static const char DOT = '.';
@@ -33,10 +27,17 @@ class Game {
 	void showGameOverScreen() const;
 	void playGame();
 	bool checkIfBoardIsComplete() const;
+	bool checkIfGhostHitsPacMan(Ghost ghost) const;
 
 public:
 	Game();
 	void displayGrid() const;
 	static bool checkValidMovement(char wantedLocation);
+
+	PacMan pacMan;
+	Ghost ghostOrange;
+	Ghost ghostRed;
+	Ghost ghostPink;
+	Ghost ghostCyan;
 
 };

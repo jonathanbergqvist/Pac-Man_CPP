@@ -11,13 +11,17 @@ void Game::playGame() {
 
 	// Initial placement of Pac-Man
 	grid[pacMan.pacmanY][pacMan.pacmanX] = pacMan.PACMAN_CHAR;
+	grid[ghostCyan.ghostY][ghostCyan.ghostX] = ghostCyan.GHOST_CHAR;
 	
 	while (!gameOver) {
 		displayGrid();
 		pacMan.movePacMan(grid);
+		ghostCyan.moveGhost(pacMan.pacmanX, pacMan.pacmanY, grid);
 
-		gameOver = checkIfBoardIsComplete();
-		// TODO: Check if hit by ghost.
+		gameOver = checkIfGhostHitsPacMan(ghostCyan);
+		if (!gameOver) {
+			gameOver = checkIfBoardIsComplete();
+		}
 	}
 
 	showGameOverScreen();
@@ -61,6 +65,14 @@ bool Game::checkIfBoardIsComplete() const {
 	return true; // Character not found
 	// TODO: Replace with another methodology when ghosts are added, as they will "hide" the dots, 
 	// e.g. have the total number of dots known and count available dots.
+}
+
+bool Game::checkIfGhostHitsPacMan(Ghost ghost) const {
+	if (pacMan.pacmanX == ghost.ghostX && pacMan.pacmanY == ghost.ghostY) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
