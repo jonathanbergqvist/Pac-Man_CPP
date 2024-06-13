@@ -23,15 +23,15 @@ void Game::playGame() {
 		grid[ghost->ghostY][ghost->ghostX] = ghost->GHOST_CHAR;
 	}
 
-	// Display the game grid
-	displayGrid();
 	while (!gameOver) {
-
+		// Display the game grid
+		displayGrid();
 		bool powerPelletHit = pacMan.movePacMan(grid);
 
 		if (powerPelletHit) {
 			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
 				ghost->changeMode(Mode::Frightened);
+				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
 				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
 			}
 		}
@@ -39,55 +39,54 @@ void Game::playGame() {
 		// Move the ghosts and check if they hit Pac-Man.
 		for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
 
-			// PRE-GHOST MOVEMENT
-			// Check if Pac-Man ran into a blue ghost.
-			checkIfPacManBlueGhostCollision(ghost);
-
-			// Check if Pac-Man ran into a regular ghost.
-			gameOver = checkIfPacManRegularGhostCollision(ghost);
+			// PRE-GHOST MOVEMENT CHECK
+			gameOver = checkCollisionAndSearchRange(ghost);
 			if (gameOver) {
 				break;
-			}
-
-			// Check if Pac-Man is within allowed range pre-movement.
-			if (checkIfPacManWithinRange(ghost) && ghost->chaseTimeLeft == 0) {
-				ghost->changeMode(Mode::Chase);
-				ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
 			}
 
 			// MOVEMENT
 			ghost->moveGhost(pacMan.pacmanX, pacMan.pacmanY, grid);
 
-			// POST-GHOST MOVEMENT
-
-			// Check if a ghost while blue ran into with Pac-Man.
-			checkIfPacManBlueGhostCollision(ghost);
-
-			// Check if a regular ghost ran into Pac-Man.
-			gameOver = checkIfPacManRegularGhostCollision(ghost);
+			// POST-GHOST MOVEMENT CHECK
+			gameOver = checkCollisionAndSearchRange(ghost);
 			if (gameOver) {
 				break;
 			}
-
-			// Check if Pac-Man is within allowed range post-movement.
-			if (checkIfPacManWithinRange(ghost) && ghost->chaseTimeLeft == 0) {
-				ghost->changeMode(Mode::Chase);
-				ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
-			}
+			
 		}
-
 
 		// Check if the board is out of pellets.
 		if (!gameOver) {
 			gameOver = checkIfBoardIsComplete();
 		}
 
-		// Display the game grid
-		displayGrid();
+		
 	}
 
 	showGameOverScreen();
 
+}
+
+bool Game::checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost) {
+	bool gameOver = false;
+
+	// Check if a ghost while blue ran into with Pac-Man.
+	checkIfPacManBlueGhostCollision(ghost);
+
+	// Check if a regular ghost ran into Pac-Man.
+	gameOver = checkIfPacManRegularGhostCollision(ghost);
+	if (gameOver) {
+		return gameOver;
+	}
+
+	// Check if Pac-Man is within allowed range post-movement.
+	if (checkIfPacManWithinRange(ghost) && ghost->currentMode == Mode::Scatter) {
+		ghost->changeMode(Mode::Chase);
+		ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
+	}
+
+	return gameOver;
 }
 
 // Set the colour of the terminal text.
@@ -126,10 +125,10 @@ void Game::displayGrid() const {
 	}
 	SetColor(hConsole, 7); // Default colour.
 
-	//cout << Game::numberOfPelletsRemaining << endl;
-	//for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-	//	cout << static_cast<int>(ghost->currentMode) << " " << pacMan.pacmanX << " " << ghost->ghostX << " " << pacMan.pacmanY << " " << ghost->ghostY << " " << ghost->blueGhostTimeLeft << endl;
-	//}
+	cout << "pY\tgY\tpX\tgX" << endl;
+	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
+		cout << pacMan.pacmanX << "\t" << ghost->ghostX << "\t" << pacMan.pacmanY << "\t" << ghost->ghostY << endl;
+	}
 
 
 }
@@ -184,8 +183,6 @@ bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
 		if (grid[g_y][x] == WALL) break;
 	}
 	return false;
-
-	return false;
 }
 
 bool Game::checkIfBoardIsComplete() const {
@@ -206,17 +203,15 @@ bool Game::checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) cons
 }
 
 void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
-	if (pacMan.pacmanX == ghost->ghostX && pacMan.pacmanY == ghost->ghostY && ghost->blueGhostTimeLeft > 0) {
+	if (pacMan.pacmanX == ghost->ghostX && pacMan.pacmanY == ghost->ghostY && ghost->currentMode == Mode::Frightened) {
 		// Ghost hit will be moved to the middle of the screen and returned to scatter mode.
-		ghost->ghostX = GRID_X / 2 - 1;
+		ghost->ghostX = GRID_X / 2 - 2;
 		ghost->ghostY = GRID_Y / 2;
 		// Update ghost's position
 		ghost->blueGhostTimeLeft = 0;
 		ghost->changeMode(Mode::Scatter);
 		grid[ghost->ghostY][ghost->ghostX] = GHOST_CHAR;
 		grid[pacMan.pacmanY][pacMan.pacmanX] = PacMan::PACMAN_CHAR;
-		//cout << static_cast<int>(ghost->currentMode) << " " << pacMan.pacmanX << " " << ghost->ghostX << " " << pacMan.pacmanY << " " << ghost->ghostY << " " << ghost->blueGhostTimeLeft << endl;
-
 	}
 }
 

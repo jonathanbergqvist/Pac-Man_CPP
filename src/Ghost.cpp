@@ -38,6 +38,8 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 	std::pair<int, int> bestMove = { ghostX, ghostY };
 
 	switch (currentMode) {
+	
+		// CHASE
 	case Mode::Chase:
 		bestMove = chaseMove(pacmanX, pacmanY, grid);
 		// Count down time for chasing ghost, once at 0 reset to scatter mode.
@@ -47,6 +49,8 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 			chaseTimeLeft = 0;
 		}
 		break;
+		
+		// FRIGHTENED
 	case Mode::Frightened:
 		// Move as frightened blue ghost
 		bestMove = frightenedMove(grid);
@@ -58,6 +62,8 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 			blueGhostTimeLeft = 0;
 		}
 		break;
+
+		// SCATTER
 	case Mode::Scatter:
 		bestMove = scatterMove(grid);
 		break;

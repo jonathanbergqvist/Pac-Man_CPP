@@ -39,10 +39,15 @@ class Game {
 
 public:
 	Game();
+
 	void displayGrid() const;
+
 	static bool checkValidPacManMovement(char wantedLocation);
 	static bool checkValidGhostMovement(char wantedLocation);
+
 	static int numberOfPelletsRemaining;
+
+	bool checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost);
 
 	PacMan pacMan;
 
