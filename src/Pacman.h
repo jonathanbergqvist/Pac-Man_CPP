@@ -9,12 +9,9 @@ public:
 	static const char PACMAN_COLOUR = 'y';
 	static const char EMPTY = ' ';
 
-	int pacmanX = 1;
-	int pacmanY = 1;
+	int pacmanX = GRID_X / 2 - 1;
+	int pacmanY = GRID_Y / 2;
 
-	void movePacMan(char grid[GRID_Y][GRID_X]);
+	bool movePacMan(char grid[GRID_Y][GRID_X]);
 
-private:
-	bool checkIfHitByGhost();
-	bool checkIfHittingBlueGhost();
 };

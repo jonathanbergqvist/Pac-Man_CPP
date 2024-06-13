@@ -4,7 +4,7 @@
 #include "Pacman.h"
 
 // Member function definitions
-void PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
+bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 	char input;
 
 	// Get user input
@@ -31,8 +31,17 @@ void PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		exit(0); // Quit the game
 	}
 
+	bool powerPelletHit = false;
+
 	// Update Pac-Man's position in the grid only if a valid input, i.e. not into a wall.
-	if (Game::checkValidMovement(grid[pacmanY][pacmanX])) {
+	if (Game::checkValidPacManMovement(grid[pacmanY][pacmanX])) {
+		if (grid[pacmanY][pacmanX] == '.' || grid[pacmanY][pacmanX] == '*') {
+			Game::numberOfPelletsRemaining -= 1;
+		}
+		if (grid[pacmanY][pacmanX] == '*') {
+			powerPelletHit = true;
+		}
+
 		grid[pacmanY][pacmanX] = PACMAN_CHAR;
 		grid[currentPositionY][currentPositionX] = EMPTY;
 	}
@@ -42,12 +51,6 @@ void PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		pacmanY = currentPositionY;
 	}
 
-}
+	return powerPelletHit;
 
-bool PacMan::checkIfHitByGhost() {
-    return false;
-}
-
-bool PacMan::checkIfHittingBlueGhost() {
-    return false;
 }
