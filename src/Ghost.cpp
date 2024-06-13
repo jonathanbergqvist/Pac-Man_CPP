@@ -40,6 +40,12 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 	switch (currentMode) {
 	case Mode::Chase:
 		bestMove = chaseMove(pacmanX, pacmanY, grid);
+		// Count down time for chasing ghost, once at 0 reset to scatter mode.
+		chaseTimeLeft--;
+		if (chaseTimeLeft <= 0) {
+			changeMode(Mode::Scatter);
+			chaseTimeLeft = 0;
+		}
 		break;
 	case Mode::Frightened:
 		// Move as frightened blue ghost

@@ -48,6 +48,14 @@ void Game::playGame() {
 			if (gameOver) {
 				break;
 			}
+
+			// Check if Pac-Man is within allowed range pre-movement.
+			if (checkIfPacManWithinRange(ghost) && ghost->chaseTimeLeft == 0) {
+				ghost->changeMode(Mode::Chase);
+				ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
+			}
+
+			// MOVEMENT
 			ghost->moveGhost(pacMan.pacmanX, pacMan.pacmanY, grid);
 
 			// POST-GHOST MOVEMENT
@@ -59,6 +67,12 @@ void Game::playGame() {
 			gameOver = checkIfPacManRegularGhostCollision(ghost);
 			if (gameOver) {
 				break;
+			}
+
+			// Check if Pac-Man is within allowed range post-movement.
+			if (checkIfPacManWithinRange(ghost) && ghost->chaseTimeLeft == 0) {
+				ghost->changeMode(Mode::Chase);
+				ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
 			}
 		}
 
@@ -143,6 +157,35 @@ int Game::countCharInGameGrid(char grid[GRID_Y][GRID_X]) {
 		}
 	}
 	return count;
+}
+
+bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
+	int g_x = ghost->ghostX;
+	int g_y = ghost->ghostY;
+
+	// Check Up
+	for (int y = g_y - 1; y >= max(0, g_y - PACMAN_SEARCH_RANGE); y--) {
+		if (grid[y][g_x] == PacMan::PACMAN_CHAR) return true;
+		if (grid[y][g_x] == WALL) break;
+	}
+	// Check Down
+	for (int y = g_y + 1; y <= min(GRID_Y - 1, g_y + PACMAN_SEARCH_RANGE); y++) {
+		if (grid[y][g_x] == PacMan::PACMAN_CHAR) return true;
+		if (grid[y][g_x] == WALL) break;
+	}
+	// Check Left
+	for (int x = g_x - 1; x >= max(0, g_x - PACMAN_SEARCH_RANGE); x--) {
+		if (grid[g_y][x] == PacMan::PACMAN_CHAR) return true;
+		if (grid[g_y][x] == WALL) break;
+	}
+	// Check Right
+	for (int x = g_x + 1; x <= min(GRID_X - 1, g_x + PACMAN_SEARCH_RANGE); x++) {
+		if (grid[g_y][x] == PacMan::PACMAN_CHAR) return true;
+		if (grid[g_y][x] == WALL) break;
+	}
+	return false;
+
+	return false;
 }
 
 bool Game::checkIfBoardIsComplete() const {

@@ -35,6 +35,7 @@ public:
     int ghostY = 1;
 
     int blueGhostTimeLeft = 0;
+    int chaseTimeLeft = 0;
 
     Ghost(Colour colour);
 

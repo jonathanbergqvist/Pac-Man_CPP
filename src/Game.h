@@ -24,7 +24,9 @@ class Game {
 	static const char DOT = '.';
 	static const char BIG_DOT = '*';
 	static const char GHOST_CHAR = 'G';
-	static const int BLUE_GHOST_TIME_LEFT = 150;
+	static const int BLUE_GHOST_TIME_LEFT = 15; // Cells
+	static const int REGULAR_GHOST_CHASE_TIME = 30; // Cells
+	static const int PACMAN_SEARCH_RANGE = 5; // 5 free non-wall columns/rows.
 
 	void showGameOverScreen() const;
 	void playGame();
@@ -32,6 +34,7 @@ class Game {
 	bool checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const;
 	void checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost);
 	int countCharInGameGrid(char grid[GRID_Y][GRID_X]);
+	bool checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const;
 
 
 public:
