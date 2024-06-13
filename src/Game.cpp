@@ -7,6 +7,7 @@
 using namespace std;
 
 int Game::numberOfPelletsRemaining;
+int Game::score = 0;
 
 void Game::playGame() {
 
@@ -125,10 +126,14 @@ void Game::displayGrid() const {
 	}
 	SetColor(hConsole, 7); // Default colour.
 
-	cout << "pY\tgY\tpX\tgX" << endl;
-	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-		cout << pacMan.pacmanX << "\t" << ghost->ghostX << "\t" << pacMan.pacmanY << "\t" << ghost->ghostY << endl;
-	}
+	cout << "SCORE: " << score << endl;
+
+
+	// DEBUGGING PRINTS!!!
+	//cout << "pY\tgY\tpX\tgX" << endl;
+	//for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
+	//	cout << pacMan.pacmanX << "\t" << ghost->ghostX << "\t" << pacMan.pacmanY << "\t" << ghost->ghostY << endl;
+	//}
 
 
 }
@@ -205,6 +210,8 @@ bool Game::checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) cons
 void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
 	if (pacMan.pacmanX == ghost->ghostX && pacMan.pacmanY == ghost->ghostY && ghost->currentMode == Mode::Frightened) {
 		// Ghost hit will be moved to the middle of the screen and returned to scatter mode.
+		score += BLUE_GHOST_SCORE; // Score for hitting blue ghost.
+
 		ghost->ghostX = GRID_X / 2 - 2;
 		ghost->ghostY = GRID_Y / 2;
 		// Update ghost's position

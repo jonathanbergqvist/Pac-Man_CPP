@@ -28,6 +28,7 @@ class Game {
 	static const int REGULAR_GHOST_CHASE_TIME = 30; // Cells
 	static const int PACMAN_SEARCH_RANGE = 5; // 5 free non-wall columns/rows.
 
+
 	void showGameOverScreen() const;
 	void playGame();
 	bool checkIfBoardIsComplete() const;
@@ -45,7 +46,12 @@ public:
 	static bool checkValidPacManMovement(char wantedLocation);
 	static bool checkValidGhostMovement(char wantedLocation);
 
+	static const int DOT_SCORE = 100;
+	static const int BIG_DOT_EXTRA_SCORE = 400;
+	static const int BLUE_GHOST_SCORE = 1000;
+
 	static int numberOfPelletsRemaining;
+	static int score;
 
 	bool checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost);
 

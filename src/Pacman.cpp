@@ -37,9 +37,11 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 	if (Game::checkValidPacManMovement(grid[pacmanY][pacmanX])) {
 		if (grid[pacmanY][pacmanX] == '.' || grid[pacmanY][pacmanX] == '*') {
 			Game::numberOfPelletsRemaining -= 1;
+			Game::score += Game::DOT_SCORE; // Score per regular pellet.
 		}
 		if (grid[pacmanY][pacmanX] == '*') {
 			powerPelletHit = true;
+			Game::score += Game::BIG_DOT_EXTRA_SCORE; // An additional score per power pellet.
 		}
 
 		grid[pacmanY][pacmanX] = PACMAN_CHAR;
