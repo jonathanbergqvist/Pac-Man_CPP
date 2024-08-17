@@ -1,30 +1,49 @@
 #pragma once
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include "Main.h"
 #include "Pacman.h"
 #include "Ghost.h"
 
 class Game {
 	char grid[GRID_Y][GRID_X] = {
-		"#####################",
-		"#...*...........*...#",
-		"#.##.###.###.###.##.#",
-		"#...................#",
-		"#.##.#.#####.#.##.#.#",
-		"#....#.......#......#",
-		"#.##.#.##.##.#.##.#.#",
-		"#...................#",
-		"#.##.###.###.###.##.#",
-		"#...*...........*...#",
-		"#####################"
+	"############################",
+	"#............##............#",
+	"#.####.#####.##.#####.####.#",
+	"#*####.#####.##.#####.####*#",
+	"#..........................#",
+	"#.####.##.########.##.####.#",
+	"#......##....##....##......#",
+	"######.##### ## #####.######",
+	"     #.##### ## #####.#     ",
+	"     #.##          ##.#     ",
+	"     #.## ###--### ##.#     ",
+	"######.## #      # ##.######",
+	"........# #      # #........", // row 12 from 0
+	"######.## #      # ##.######",
+	"     #.## ######## ##.#     ",
+	"     #.##          ##.#     ",
+	"     #.## ######## ##.#     ",
+	"######.## ######## ##.######",
+	"#............##............#",
+	"#.####.#####.##.#####.####.#",
+	"#*..##................##..*#",
+	"###.##.##.########.##.##.###",
+	"###.##.##.########.##.##.###",
+	"#......##....##....##......#",
+	"#.##########.##.##########.#",
+	"#..........................#",
+	"############################"
 	};
 
 	static const char WALL = '#';
 	static const char DOT = '.';
 	static const char BIG_DOT = '*';
-	static const char GHOST_CHAR = 'G';
-	static const int BLUE_GHOST_TIME_LEFT = 15; // Cells
+	static const char GHOST_WALL = '-';
+
+	static const int BLUE_GHOST_TIME_LEFT = 30; // Cells
 	static const int REGULAR_GHOST_CHASE_TIME = 30; // Cells
 	static const int PACMAN_SEARCH_RANGE = 5; // 5 free non-wall columns/rows.
 
@@ -37,14 +56,19 @@ class Game {
 	int countCharInGameGrid(char grid[GRID_Y][GRID_X]);
 	bool checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const;
 
-
 public:
 	Game();
 
 	void displayGrid() const;
 
 	static bool checkValidPacManMovement(char wantedLocation);
-	static bool checkValidGhostMovement(char wantedLocation);
+	static bool checkValidStartGhostMovement(char wantedLocation);
+	static bool checkValidNonStartGhostMovement(char wantedLocation);
+	static int checkIfChangeInSideX(int posX);
+
+	static const char GHOST_CHAR = 'G';
+	static const char PACMAN_CHAR = 'C';
+	static const char EMPTY = ' ';
 
 	static const int DOT_SCORE = 100;
 	static const int BIG_DOT_EXTRA_SCORE = 400;
@@ -52,15 +76,16 @@ public:
 
 	static int numberOfPelletsRemaining;
 	static int score;
+	static int userRound;
 
 	bool checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost);
 
 	PacMan pacMan;
 
-	std::shared_ptr<Ghost> ghostOrange = std::make_shared<Ghost>(Colour::Orange);
-	std::shared_ptr<Ghost> ghostRed = std::make_shared<Ghost>(Colour::Red);
-	std::shared_ptr<Ghost> ghostPink = std::make_shared<Ghost>(Colour::Pink);
-	std::shared_ptr<Ghost> ghostCyan = std::make_shared<Ghost>(Colour::Cyan);
+	std::shared_ptr<Ghost> ghostOrange = std::make_shared<Ghost>(COLOUR::Orange);
+	std::shared_ptr<Ghost> ghostRed = std::make_shared<Ghost>(COLOUR::Red);
+	std::shared_ptr<Ghost> ghostPink = std::make_shared<Ghost>(COLOUR::Pink);
+	std::shared_ptr<Ghost> ghostCyan = std::make_shared<Ghost>(COLOUR::Cyan);
 
 	std::vector<std::shared_ptr<Ghost>> ghostsPtr = {
 		ghostOrange,

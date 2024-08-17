@@ -35,6 +35,11 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 
 	// Update Pac-Man's position in the grid only if a valid input, i.e. not into a wall.
 	if (Game::checkValidPacManMovement(grid[pacmanY][pacmanX])) {
+
+		// Check if PacMan shall switch side on the game board.
+		pacmanX = Game::checkIfChangeInSideX(pacmanX);
+		
+		
 		if (grid[pacmanY][pacmanX] == '.' || grid[pacmanY][pacmanX] == '*') {
 			Game::numberOfPelletsRemaining -= 1;
 			Game::score += Game::DOT_SCORE; // Score per regular pellet.
@@ -44,15 +49,14 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 			Game::score += Game::BIG_DOT_EXTRA_SCORE; // An additional score per power pellet.
 		}
 
-		grid[pacmanY][pacmanX] = PACMAN_CHAR;
-		grid[currentPositionY][currentPositionX] = EMPTY;
+		grid[pacmanY][pacmanX] = Game::PACMAN_CHAR;
+		grid[currentPositionY][currentPositionX] = Game::EMPTY;
 	}
 	else {
 		// Reset the position of Pac-Man to the position before used selected direction.
 		pacmanX = currentPositionX;
 		pacmanY = currentPositionY;
 	}
-
 	return powerPelletHit;
 
 }

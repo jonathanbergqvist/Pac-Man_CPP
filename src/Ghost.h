@@ -3,20 +3,22 @@
 #include <iostream>
 #include <vector>
 #include <map>
-
 #include "Main.h"
+#include "Game.h"
 
 // Enum to represent ghost modes
-enum class Mode { Chase, Scatter, Frightened };
-enum class Colour {Orange, Red, Pink, Cyan};
+enum class MODE { Chase, Scatter, Frightened, Start };
+enum class COLOUR {Orange, Red, Pink, Cyan};
+static std::pair<int, int> START_POSITION = { 13, 9 };
+
 
 class Ghost {
-    Colour ghostColour;
     std::pair<int, int> scatterMove(char grid[GRID_Y][GRID_X]); // Move randomly
     std::pair<int, int> frightenedMove(char grid[GRID_Y][GRID_X]); // Escape PacMan
     std::pair<int, int> chaseMove(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]); // Chase after PacMan
+    std::pair<int, int> startMove(int targetX, int targetY, char grid[GRID_Y][GRID_X]); // To get outside the ghost box.
 
-    std::vector<std::pair<int, int>> possibleMoves = {
+    std::vector<std::pair<int, int>> POSSIBLE_MOVES = {
         {ghostX + 1, ghostY},	// Right
         {ghostX - 1, ghostY},	// Left
         {ghostX, ghostY + 1},	// Down
@@ -26,10 +28,12 @@ class Ghost {
     void updatePossibleMovesCoordinates();
 
 public:
-    //const char GHOST_COLOUR_CHASED = 'b'; // Blue
-    const char GHOST_CHAR = 'G';
-    Mode currentMode;
-    char currentPositionChar = '.';
+    COLOUR ghostColour;
+    MODE currentMode;
+    char currentPositionChar;
+
+    std::string colourEnumToString(COLOUR value);
+    std::string modeEnumToString(MODE value);
 
     int ghostX = 4;
     int ghostY = 1;
@@ -37,9 +41,9 @@ public:
     int blueGhostTimeLeft = 0;
     int chaseTimeLeft = 0;
 
-    Ghost(Colour colour);
+    Ghost(COLOUR colour); // Constructor assigning a colour and colour properties to the ghost.
 
-    void changeMode(Mode mode);
+    void changeMode(MODE mode);
 
     void moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]);
 
