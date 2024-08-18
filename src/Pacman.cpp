@@ -29,6 +29,8 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		break;
 	case 'q':
 		exit(0); // Quit the game
+	default:
+		break;
 	}
 
 	bool powerPelletHit = false;
@@ -49,8 +51,9 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 			Game::score += Game::BIG_DOT_EXTRA_SCORE; // An additional score per power pellet.
 		}
 
-		grid[pacmanY][pacmanX] = Game::PACMAN_CHAR;
+		// Change current position first, in case current position and the new position is the same through e.g. pressing a non-allowed button (i.e. not wasdq).
 		grid[currentPositionY][currentPositionX] = Game::EMPTY;
+		grid[pacmanY][pacmanX] = Game::PACMAN_CHAR;
 	}
 	else {
 		// Reset the position of Pac-Man to the position before used selected direction.

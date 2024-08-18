@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-constexpr int GRID_X = 29;
+constexpr int GRID_X = 30;
 constexpr int GRID_Y = 27;
 
 constexpr int ORANGE_GHOST_CORNER_X = 1; // Orange ghost, top left corner

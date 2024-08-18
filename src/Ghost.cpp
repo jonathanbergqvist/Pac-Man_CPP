@@ -9,19 +9,19 @@ Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
 
 	switch (ghostColour) {
 	case COLOUR::Orange:
-		ghostX = 15;
+		ghostX = 16;
 		ghostY = 12;
 		break;
 	case COLOUR::Red:
-		ghostX = 13;
+		ghostX = 14;
 		ghostY = 9;
 		break;
 	case COLOUR::Pink:
-		ghostX = 13;
+		ghostX = 14;
 		ghostY = 12;
 		break;
 	case COLOUR::Cyan:
-		ghostX = 11;
+		ghostX = 12;
 		ghostY = 12;
 		break;
 	default:
@@ -77,7 +77,7 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 	}
 
 	// Make sure that in case of hit with Pac-Man, that the position is left EMPTY.
-	if (currentPositionChar == Game::PACMAN_CHAR) {
+	if (ghostX == pacmanX && ghostY == pacmanY) {
 		currentPositionChar = Game::EMPTY;
 	}
 

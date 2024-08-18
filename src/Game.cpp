@@ -137,8 +137,11 @@ void Game::displayGrid() const {
 	}
 	SetColor(hConsole, 7); // Default colour.
 
+	//std::cout << std::endl << "PELLETS LEFT: " << numberOfPelletsRemaining << std::endl;
+	
 	std::cout << "SCORE: " << score << std::endl;
 
+	// DEBUGGING PRINTS!!!
 	/*std::cout << "POS PAC-MAN " << pacMan.pacmanX << " " << pacMan.pacmanY << std::endl;
 	std::cout << "ORANGE GHOST " << ghostOrange->ghostX << " " << ghostOrange->ghostY << " " << ghostOrange->modeEnumToString(ghostOrange->currentMode) << std::endl;
 	std::cout << "RED GHOST " << ghostRed->ghostX << " " << ghostRed->ghostY << " " << ghostRed->modeEnumToString(ghostRed->currentMode) << std::endl;
@@ -184,8 +187,8 @@ int Game::checkIfChangeInSideX(int posX) {
 
 int Game::countCharInGameGrid(char grid[GRID_Y][GRID_X]) {
 	int count = 0;
-	for (int y = 0; y < GRID_Y; ++y) {
-		for (int x = 0; x < GRID_X; ++x) {
+	for (int y = 0; y < GRID_Y; y++) {
+		for (int x = 0; x < GRID_X; x++) {
 			if (grid[y][x] == DOT || grid[y][x] == BIG_DOT) {
 				count += 1;
 			}
@@ -247,6 +250,9 @@ void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
 
 		// Replace the hit ghost position with EMPTY.
 		grid[ghost->ghostY][ghost->ghostX] = EMPTY;
+
+		// Replace the position char with EMPTY, to allow no dots in start box.
+		ghost->currentPositionChar = EMPTY;
 
 		// Update ghost's position to the staring box
 		ghost->ghostX = GRID_X / 2;
