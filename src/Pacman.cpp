@@ -3,29 +3,29 @@
 #include "Game.h"
 #include "Pacman.h"
 
+Game::DIRECTION currentPacManDirectíon;
+Game::DIRECTION wantedPacManDirection;
+
 // Member function definitions
-bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
+void PacMan::changePacManDirection(char grid[GRID_Y][GRID_X]) {
 	char input;
 
 	// Get user input
 	input = _getch();
 
-	char currentPositionX = pacmanX;
-	char currentPositionY = pacmanY;
-
 	// Update Pac-Man's position based on input
 	switch(input) {
 	case 'w':
-		pacmanY--;
+		wantedPacManDirection = Game::DIRECTION::Up;
 		break;
 	case 's':
-		pacmanY++;
+		wantedPacManDirection = Game::DIRECTION::Left;
 		break;
 	case 'a':
-		pacmanX--;
+		wantedPacManDirection = Game::DIRECTION::Down;
 		break;
 	case 'd':
-		pacmanX++;
+		wantedPacManDirection = Game::DIRECTION::Right;
 		break;
 	case 'q':
 		exit(0); // Quit the game
@@ -33,15 +33,37 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		break;
 	}
 
+	//movePacMan(grid);
+}
+
+bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 	bool powerPelletHit = false;
+
+	char currentPositionX = pacmanX;
+	char currentPositionY = pacmanY;
+
+	// Check the direction of the movement.
+	if (wantedPacManDirection == Game::DIRECTION::Up) {
+		pacmanY--;
+	}
+	else if (wantedPacManDirection == Game::DIRECTION::Left) {
+		pacmanY++;
+	}
+	else if (wantedPacManDirection == Game::DIRECTION::Down) {
+		pacmanX--;
+	}
+	else if (wantedPacManDirection == Game::DIRECTION::Right) {
+		pacmanX++;
+	}
 
 	// Update Pac-Man's position in the grid only if a valid input, i.e. not into a wall.
 	if (Game::checkValidPacManMovement(grid[pacmanY][pacmanX])) {
+		currentPacManDirectíon = wantedPacManDirection;
 
 		// Check if PacMan shall switch side on the game board.
 		pacmanX = Game::checkIfChangeInSideX(pacmanX);
-		
-		
+
+
 		if (grid[pacmanY][pacmanX] == '.' || grid[pacmanY][pacmanX] == '*') {
 			Game::numberOfPelletsRemaining -= 1;
 			Game::score += Game::DOT_SCORE; // Score per regular pellet.
@@ -59,7 +81,7 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		// Reset the position of Pac-Man to the position before used selected direction.
 		pacmanX = currentPositionX;
 		pacmanY = currentPositionY;
+		wantedPacManDirection = currentPacManDirectíon;
 	}
 	return powerPelletHit;
-
 }

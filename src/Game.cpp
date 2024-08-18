@@ -12,6 +12,7 @@ using namespace std;
 int Game::numberOfPelletsRemaining;
 int Game::score = 0;
 
+bool powerPelletHit = false;
 bool Game::gameOver = false;
 
 const double targetFPS = 60.0;
@@ -35,6 +36,17 @@ void Game::playGame() {
 	
 		// Display the game grid
 		displayGrid();
+
+		// Move Pac-Man in the set direction if it's valid.
+		bool powerPelletHit = pacMan.movePacMan(grid);
+		// Change ghosts movement to FRIGHTENED if Pac-Man hit a power pellet.
+		if (powerPelletHit) {
+			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
+				ghost->changeMode(MODE::Frightened);
+				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
+				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
+			}
+		}
 
 		// Move the ghosts and check if they hit Pac-Man.
 		for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
@@ -245,15 +257,15 @@ std::atomic_bool g_run(true); // Shared flag for both threads
 void Game::UserInputThread() {
 	std::string input;
 	while (g_run) {
-		bool powerPelletHit = pacMan.movePacMan(grid);
+		pacMan.changePacManDirection(grid);
 
-		if (powerPelletHit) {
-			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-				ghost->changeMode(MODE::Frightened);
-				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
-				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
-			}
-		}
+		//if (powerPelletHit) {
+		//	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
+		//		ghost->changeMode(MODE::Frightened);
+		//		ghost->chaseTimeLeft = 0; // Remove eventual chase time.
+		//		ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
+		//	}
+		//}
 	}
 }
 

@@ -2,6 +2,9 @@
 #include "Pacman.h"
 #include "Ghost.h"
 
+Game::DIRECTION currentGhostDirectíon;
+Game::DIRECTION wantedGhostDirection;
+
 Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
 	// Constructor implementation for colored ghost
 	currentMode = MODE::Start;
@@ -84,6 +87,21 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 	// Replace the old position with the char before the ghost entered the position.
 	grid[ghostY][ghostX] = currentPositionChar;
 
+	// Check the direction of the movement.
+	if (bestMove.first - ghostX > 0) {
+		wantedGhostDirection = Game::DIRECTION::Right;
+	} else if (bestMove.first - ghostX < 0) {
+		wantedGhostDirection = Game::DIRECTION::Left;
+	} else if (bestMove.second - ghostY > 0) {
+		wantedGhostDirection = Game::DIRECTION::Down;
+	} else if (bestMove.second - ghostY < 0) {
+		wantedGhostDirection = Game::DIRECTION::Up;
+	}
+
+	if (wantedGhostDirection != currentGhostDirectíon) {
+		currentGhostDirectíon = wantedGhostDirection;
+	}
+
 	// Set the new ghost coordinates
 	ghostX = bestMove.first;
 	ghostY = bestMove.second;
@@ -114,13 +132,31 @@ void Ghost::updatePossibleMovesCoordinates() {
 
 std::pair<int, int> Ghost::scatterMove(char grid[GRID_Y][GRID_X]) {
 	bool validMove = false;
+	std::pair<int, int> move;
 	int randomIndex;
-	while (!validMove) {
-		randomIndex = rand() % POSSIBLE_MOVES.size(); // Get a random index
-		std::pair<int, int> move = POSSIBLE_MOVES[randomIndex];
+
+	// Check if the current direction is valid.
+	if (currentGhostDirectíon == Game::DIRECTION::Up) {
+		move = POSSIBLE_MOVES[3];
+		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirectíon == Game::DIRECTION::Down) {
+		move = POSSIBLE_MOVES[2];
+		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirectíon == Game::DIRECTION::Left) {
+		move = POSSIBLE_MOVES[1];
+		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirectíon == Game::DIRECTION::Right) {
+		move = POSSIBLE_MOVES[0];
 		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
 	}
-	return POSSIBLE_MOVES[randomIndex]; // Return the random move
+
+	// If the current direction isn't valid, select a new valid one at random.
+	while (!validMove) {
+		randomIndex = rand() % POSSIBLE_MOVES.size(); // Get a random index
+		move = POSSIBLE_MOVES[randomIndex];
+		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	}
+	return move; // Return the random move
 }
 
 

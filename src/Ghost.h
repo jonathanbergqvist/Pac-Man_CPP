@@ -8,7 +8,7 @@
 
 // Enum to represent ghost modes
 enum class MODE { Chase, Scatter, Frightened, Start };
-enum class COLOUR {Orange, Red, Pink, Cyan};
+enum class COLOUR { Orange, Red, Pink, Cyan };
 static std::pair<int, int> START_POSITION = { 13, 9 };
 
 

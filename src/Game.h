@@ -43,7 +43,7 @@ class Game {
 	static const char BIG_DOT = '*';
 	static const char GHOST_WALL = '-';
 
-	static const int BLUE_GHOST_TIME_LEFT = 30; // Cells
+	static const int BLUE_GHOST_TIME_LEFT = 60; // Cells
 	static const int REGULAR_GHOST_CHASE_TIME = 30; // Cells
 	static const int PACMAN_SEARCH_RANGE = 5; // 5 free non-wall columns/rows.
 
@@ -58,6 +58,8 @@ class Game {
 	bool checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const;
 
 public:
+	enum class DIRECTION { Up, Down, Left, Right };
+
 	Game();
 
 	void UserInputThread();
