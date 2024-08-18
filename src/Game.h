@@ -49,6 +49,7 @@ class Game {
 
 
 	void showGameOverScreen() const;
+	void setupGame();
 	void playGame();
 	bool checkIfBoardIsComplete() const;
 	bool checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const;
@@ -58,6 +59,9 @@ class Game {
 
 public:
 	Game();
+
+	void UserInputThread();
+	void RenderingThread();
 
 	void displayGrid() const;
 
@@ -76,7 +80,7 @@ public:
 
 	static int numberOfPelletsRemaining;
 	static int score;
-	static int userRound;
+	static bool gameOver;
 
 	bool checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost);
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <conio.h> // For _getch()
 #include <windows.h> // For colouring the terminal characters
+#include <thread>
+#include <atomic>
 
 #include "Game.h"
 #include "Ghost.h"
@@ -10,12 +12,13 @@ using namespace std;
 int Game::numberOfPelletsRemaining;
 int Game::score = 0;
 
-int Game::userRound = 0;
+bool Game::gameOver = false;
 
-void Game::playGame() {
+const double targetFPS = 60.0;
+const double frameDuration = 1.0 / targetFPS;
 
-	bool gameOver = false;
 
+void Game::setupGame() {
 	// Initial placement of Pac-Man
 	grid[pacMan.pacmanY][pacMan.pacmanX] = Game::PACMAN_CHAR;
 
@@ -26,21 +29,12 @@ void Game::playGame() {
 	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
 		grid[ghost->ghostY][ghost->ghostX] = Game::GHOST_CHAR;
 	}
+}
 
-	while (!gameOver) {
-		userRound += 1;
-
+void Game::playGame() {
+	
 		// Display the game grid
 		displayGrid();
-		bool powerPelletHit = pacMan.movePacMan(grid);
-
-		if (powerPelletHit) {
-			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-				ghost->changeMode(MODE::Frightened);
-				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
-				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
-			}
-		}
 
 		// Move the ghosts and check if they hit Pac-Man.
 		for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
@@ -66,12 +60,6 @@ void Game::playGame() {
 		if (!gameOver) {
 			gameOver = checkIfBoardIsComplete();
 		}
-
-		
-	}
-
-	showGameOverScreen();
-
 }
 
 bool Game::checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost) {
@@ -140,21 +128,6 @@ void Game::displayGrid() const {
 	//std::cout << std::endl << "PELLETS LEFT: " << numberOfPelletsRemaining << std::endl;
 	
 	std::cout << "SCORE: " << score << std::endl;
-
-	// DEBUGGING PRINTS!!!
-	/*std::cout << "POS PAC-MAN " << pacMan.pacmanX << " " << pacMan.pacmanY << std::endl;
-	std::cout << "ORANGE GHOST " << ghostOrange->ghostX << " " << ghostOrange->ghostY << " " << ghostOrange->modeEnumToString(ghostOrange->currentMode) << std::endl;
-	std::cout << "RED GHOST " << ghostRed->ghostX << " " << ghostRed->ghostY << " " << ghostRed->modeEnumToString(ghostRed->currentMode) << std::endl;
-	std::cout << "PINK GHOST " << ghostPink->ghostX << " " << ghostPink->ghostY << " " << ghostPink->modeEnumToString(ghostPink->currentMode) << std::endl;
-	std::cout << "CYAN GHOST " << ghostCyan->ghostX << " " << ghostCyan->ghostY << " " << ghostCyan->modeEnumToString(ghostCyan->currentMode) << std::endl;*/
-
-
-	// DEBUGGING PRINTS!!!
-	//cout << "pY\tgY\tpX\tgX" << endl;
-	//for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-	//	cout << pacMan.pacmanX << "\t" << ghost->ghostX << "\t" << pacMan.pacmanY << "\t" << ghost->ghostY << endl;
-	//}
-
 
 }
 
@@ -265,8 +238,44 @@ void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+std::atomic_bool g_run(true); // Shared flag for both threads
+
+void Game::UserInputThread() {
+	std::string input;
+	while (g_run) {
+		bool powerPelletHit = pacMan.movePacMan(grid);
+
+		if (powerPelletHit) {
+			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
+				ghost->changeMode(MODE::Frightened);
+				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
+				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
+			}
+		}
+	}
+}
+
+void Game::RenderingThread() {
+	setupGame();
+
+	while (g_run && !gameOver) {
+		playGame();
+		std::this_thread::sleep_for(std::chrono::duration<double>(frameDuration));
+	}
+	g_run = false; // Block further input and rendering.
+	showGameOverScreen();
+
+}
+
 // Constructor implementation
 Game::Game() :
 	pacMan() {
-	playGame();
+	std::thread inputThread(&Game::UserInputThread, this);
+	std::thread renderThread(&Game::RenderingThread, this);
+
+	// Wait for threads to finish
+	inputThread.join();
+	renderThread.join();
 }
