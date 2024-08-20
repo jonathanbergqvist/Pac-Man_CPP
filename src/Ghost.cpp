@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Pacman.h"
 #include "Ghost.h"
 
 Game::DIRECTION currentGhostDirectíon;

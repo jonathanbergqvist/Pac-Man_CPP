@@ -1,10 +1,8 @@
 #pragma once
 
-#include <iostream>
+#include <string>
 #include <vector>
-#include <map>
 #include "Main.h"
-#include "Game.h"
 
 // Enum to represent ghost modes
 enum class MODE { Chase, Scatter, Frightened, Start };

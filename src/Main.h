@@ -14,7 +14,3 @@ constexpr int PINK_GHOST_CORNER_Y = GRID_Y - 2;
 
 constexpr int CYAN_GHOST_CORNER_X = GRID_X - 3; // Cyan ghost, bottom right corner
 constexpr int CYAN_GHOST_CORNER_Y = GRID_Y - 2;
-
-
-#include <iostream>
-#include "Game.h"

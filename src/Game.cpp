@@ -1,13 +1,11 @@
 #include <iostream>
-#include <conio.h> // For _getch()
 #include <windows.h> // For colouring the terminal characters
 #include <thread>
 #include <atomic>
+#include <string>
 
 #include "Game.h"
 #include "Ghost.h"
-
-using namespace std;
 
 int Game::numberOfPelletsRemaining;
 int Game::score = 0;
@@ -15,8 +13,8 @@ int Game::score = 0;
 bool powerPelletHit = false;
 bool Game::gameOver = false;
 
-const double targetFPS = 60.0;
-const double frameDuration = 1.0 / targetFPS;
+const double TARGET_FPS = 60.0;
+const double FRAME_DURATION = 1.0 / TARGET_FPS;
 
 
 void Game::setupGame() {
@@ -145,7 +143,7 @@ void Game::displayGrid() const {
 
 void Game::showGameOverScreen() const {
 	displayGrid();
-	cout << "GAME OVER" << endl;
+	std::cout << "GAME OVER" << std::endl;
 }
 
 bool Game::checkValidPacManMovement(char wantedLocation) {
@@ -258,14 +256,6 @@ void Game::UserInputThread() {
 	std::string input;
 	while (g_run) {
 		pacMan.changePacManDirection(grid);
-
-		//if (powerPelletHit) {
-		//	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-		//		ghost->changeMode(MODE::Frightened);
-		//		ghost->chaseTimeLeft = 0; // Remove eventual chase time.
-		//		ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
-		//	}
-		//}
 	}
 }
 
@@ -274,7 +264,7 @@ void Game::RenderingThread() {
 
 	while (g_run && !gameOver) {
 		playGame();
-		std::this_thread::sleep_for(std::chrono::duration<double>(frameDuration));
+		std::this_thread::sleep_for(std::chrono::duration<double>(FRAME_DURATION));
 	}
 	g_run = false; // Block further input and rendering.
 	showGameOverScreen();
