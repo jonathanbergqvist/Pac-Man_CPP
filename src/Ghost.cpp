@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "Ghost.h"
 
-Game::DIRECTION currentGhostDirectíon;
+Game::DIRECTION currentGhostDirection;
 Game::DIRECTION wantedGhostDirection;
 
 Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
@@ -97,8 +97,8 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 		wantedGhostDirection = Game::DIRECTION::Up;
 	}
 
-	if (wantedGhostDirection != currentGhostDirectíon) {
-		currentGhostDirectíon = wantedGhostDirection;
+	if (wantedGhostDirection != currentGhostDirection) {
+		currentGhostDirection = wantedGhostDirection;
 	}
 
 	// Set the new ghost coordinates
@@ -135,16 +135,16 @@ std::pair<int, int> Ghost::scatterMove(char grid[GRID_Y][GRID_X]) {
 	int randomIndex;
 
 	// Check if the current direction is valid.
-	if (currentGhostDirectíon == Game::DIRECTION::Up) {
+	if (currentGhostDirection == Game::DIRECTION::Up) {
 		move = POSSIBLE_MOVES[3];
 		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirectíon == Game::DIRECTION::Down) {
+	} else if (currentGhostDirection == Game::DIRECTION::Down) {
 		move = POSSIBLE_MOVES[2];
 		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirectíon == Game::DIRECTION::Left) {
+	} else if (currentGhostDirection == Game::DIRECTION::Left) {
 		move = POSSIBLE_MOVES[1];
 		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirectíon == Game::DIRECTION::Right) {
+	} else if (currentGhostDirection == Game::DIRECTION::Right) {
 		move = POSSIBLE_MOVES[0];
 		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
 	}

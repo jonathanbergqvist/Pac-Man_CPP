@@ -3,7 +3,7 @@
 #include "Game.h"
 #include "Pacman.h"
 
-Game::DIRECTION currentPacManDirectíon;
+Game::DIRECTION currentPacManDirection;
 Game::DIRECTION wantedPacManDirection;
 
 // Member function definitions
@@ -58,7 +58,7 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 
 	// Update Pac-Man's position in the grid only if a valid input, i.e. not into a wall.
 	if (Game::checkValidPacManMovement(grid[pacmanY][pacmanX])) {
-		currentPacManDirectíon = wantedPacManDirection;
+		currentPacManDirection = wantedPacManDirection;
 
 		// Check if PacMan shall switch side on the game board.
 		pacmanX = Game::checkIfChangeInSideX(pacmanX);
@@ -81,7 +81,7 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		// Reset the position of Pac-Man to the position before used selected direction.
 		pacmanX = currentPositionX;
 		pacmanY = currentPositionY;
-		wantedPacManDirection = currentPacManDirectíon;
+		wantedPacManDirection = currentPacManDirection;
 	}
 	return powerPelletHit;
 }
