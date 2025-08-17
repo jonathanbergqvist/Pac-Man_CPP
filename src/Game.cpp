@@ -1,3 +1,5 @@
+#define NOMINMAX // To avoid min/max macros from windows.h
+
 #include <iostream>
 #include <windows.h> // For colouring the terminal characters
 #include <thread>
@@ -187,22 +189,22 @@ bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
 	// Make sure that the coordinates are within allowed ranges.
 	if (g_x >= 0 && g_x < GRID_X && g_y >= 0 && g_y < GRID_Y) {
 		// Check Up
-		for (int y = g_y - 1; y >= max(0, g_y - PACMAN_SEARCH_RANGE); y--) {
+		for (int y = g_y - 1; y >= std::max(0, g_y - PACMAN_SEARCH_RANGE); y--) {
 			if (grid[y][g_x] == Game::PACMAN_CHAR) return true;
 			if (grid[y][g_x] == WALL) break;
 		}
 		// Check Down
-		for (int y = g_y + 1; y <= min(GRID_Y - 1, g_y + PACMAN_SEARCH_RANGE); y++) {
+		for (int y = g_y + 1; y <= std::min(GRID_Y - 1, g_y + PACMAN_SEARCH_RANGE); y++) {
 			if (grid[y][g_x] == Game::PACMAN_CHAR) return true;
 			if (grid[y][g_x] == WALL) break;
 		}
 		// Check Left
-		for (int x = g_x - 1; x >= max(0, g_x - PACMAN_SEARCH_RANGE); x--) {
+		for (int x = g_x - 1; x >= std::max(0, g_x - PACMAN_SEARCH_RANGE); x--) {
 			if (grid[g_y][x] == Game::PACMAN_CHAR) return true;
 			if (grid[g_y][x] == WALL) break;
 		}
 		// Check Right
-		for (int x = g_x + 1; x <= min(GRID_X - 1, g_x + PACMAN_SEARCH_RANGE); x++) {
+		for (int x = g_x + 1; x <= std::min(GRID_X - 1, g_x + PACMAN_SEARCH_RANGE); x++) {
 			if (grid[g_y][x] == Game::PACMAN_CHAR) return true;
 			if (grid[g_y][x] == WALL) break;
 		}
