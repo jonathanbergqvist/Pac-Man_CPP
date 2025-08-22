@@ -35,7 +35,8 @@ void Game::setupGame() {
 void Game::playGame() {
 	
 		// Display the game grid
-		displayGrid();
+		//displayGrid();
+		displayGUIWindow();
 
 		// Move Pac-Man in the set direction if it's valid.
 		bool powerPelletHit = pacMan.movePacMan(grid);
@@ -143,8 +144,45 @@ void Game::displayGrid() const {
 
 }
 
+// Display the game board GUI
+void Game::displayGUIWindow() const {
+	system("cls"); // Clear the console.
+
+	gameGUI.drawBackground();
+
+	for (int y = 0; y < GRID_Y; y++) {
+		for (int x = 0; x < GRID_X; x++) {
+			if (x == pacMan.pacmanX && y == pacMan.pacmanY) {
+				gameGUI.drawPacMan(pacMan);
+			}
+			else if (x == ghostOrange->ghostX && y == ghostOrange->ghostY) {
+				gameGUI.drawSingleGhost(*ghostOrange);
+			}
+			else if (x == ghostRed->ghostX && y == ghostRed->ghostY) {
+				gameGUI.drawSingleGhost(*ghostRed);
+			}
+			else if (x == ghostPink->ghostX && y == ghostPink->ghostY) {
+				gameGUI.drawSingleGhost(*ghostPink);
+			}
+			else if (x == ghostCyan->ghostX && y == ghostCyan->ghostY) {
+				gameGUI.drawSingleGhost(*ghostCyan);
+			}
+			else if (grid[y][x] == '.') {
+				gameGUI.drawPelletSmall(x, y);
+			}
+			else if (grid[y][x] == '*') {
+				gameGUI.drawPelletLarge(x, y);
+			}
+		}
+
+
+	}
+	std::cout << "SCORE: " << score << std::endl;
+
+}
+
 void Game::showGameOverScreen() const {
-	displayGrid();
+	//displayGrid();
 	std::cout << "GAME OVER" << std::endl;
 }
 
@@ -278,7 +316,8 @@ void Game::RenderingThread() {
 }
 
 // Constructor implementation
-Game::Game() :
+Game::Game(GUI& gui) :
+	gameGUI(gui),
 	pacMan() {
 	std::thread inputThread(&Game::UserInputThread, this);
 	std::thread renderThread(&Game::RenderingThread, this);

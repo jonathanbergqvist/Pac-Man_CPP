@@ -6,6 +6,7 @@
 #include "Main.h"
 #include "Pacman.h"
 #include "Ghost.h"
+#include "GUI.h"
 
 class Game {
 	char grid[GRID_Y][GRID_X] = {
@@ -60,12 +61,13 @@ class Game {
 public:
 	enum class DIRECTION { Up, Down, Left, Right };
 
-	Game();
+	Game(GUI& gameGUI);
 
 	void UserInputThread();
 	void RenderingThread();
 
 	void displayGrid() const;
+	void displayGUIWindow() const;
 
 	static bool checkValidPacManMovement(char wantedLocation);
 	static bool checkValidStartGhostMovement(char wantedLocation);
@@ -99,5 +101,8 @@ public:
 		ghostPink,
 		ghostCyan
 	};
+
+private:
+	GUI& gameGUI;
 
 };

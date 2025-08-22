@@ -1,4 +1,5 @@
 #include <conio.h> // For _getch()
+#include <optional>
 
 #include "Game.h"
 #include "Pacman.h"
@@ -84,4 +85,10 @@ bool PacMan::movePacMan(char grid[GRID_Y][GRID_X]) {
 		wantedPacManDirection = currentPacManDirection;
 	}
 	return powerPelletHit;
+}
+
+PacMan::PacMan() {
+	pacmanX = 14;
+	pacmanY = 20;
+
 }

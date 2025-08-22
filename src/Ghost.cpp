@@ -13,18 +13,22 @@ Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
 	case COLOUR::Orange:
 		ghostX = 16;
 		ghostY = 12;
+		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_ORANGE;
 		break;
 	case COLOUR::Red:
 		ghostX = 14;
 		ghostY = 9;
+		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_RED;
 		break;
 	case COLOUR::Pink:
 		ghostX = 14;
 		ghostY = 12;
+		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_PINK;
 		break;
 	case COLOUR::Cyan:
 		ghostX = 12;
 		ghostY = 12;
+		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_CYAN;
 		break;
 	default:
 		break;
@@ -55,6 +59,7 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 		// FRIGHTENED
 	case MODE::Frightened:
 		// Move as frightened blue ghost
+		CURRENT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_BLUE_SCARED;
 		bestMove = frightenedMove(grid);
 
 		// Count down time for frightened ghost, once at 0 reset to scatter mode.
@@ -67,6 +72,7 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
 
 		// SCATTER
 	case MODE::Scatter:
+		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 		bestMove = scatterMove(grid);
 		break;
 

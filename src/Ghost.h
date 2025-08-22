@@ -9,7 +9,6 @@ enum class MODE { Chase, Scatter, Frightened, Start };
 enum class COLOUR { Orange, Red, Pink, Cyan };
 static std::pair<int, int> START_POSITION = { 13, 9 };
 
-
 class Ghost {
     std::pair<int, int> scatterMove(char grid[GRID_Y][GRID_X]); // Move randomly
     std::pair<int, int> frightenedMove(char grid[GRID_Y][GRID_X]); // Escape PacMan
@@ -29,6 +28,8 @@ public:
     COLOUR ghostColour;
     MODE currentMode;
     char currentPositionChar;
+    TextureHandler::ASSETS DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_BLUE_SCARED; // Default to blue common ghost.
+    TextureHandler::ASSETS CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 
     std::string colourEnumToString(COLOUR value);
     std::string modeEnumToString(MODE value);
