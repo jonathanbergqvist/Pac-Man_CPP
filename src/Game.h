@@ -51,7 +51,7 @@ class Game {
 
 	void showGameOverScreen() const;
 	void setupGame();
-	void playGame();
+	void playGame(double deltaTime);
 	bool checkIfBoardIsComplete() const;
 	bool checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const;
 	void checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost);

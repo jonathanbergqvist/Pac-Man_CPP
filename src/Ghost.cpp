@@ -14,21 +14,25 @@ Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
 		ghostX = 16;
 		ghostY = 12;
 		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_ORANGE;
+		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 		break;
 	case COLOUR::Red:
 		ghostX = 14;
 		ghostY = 9;
 		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_RED;
+		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 		break;
 	case COLOUR::Pink:
 		ghostX = 14;
 		ghostY = 12;
 		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_PINK;
+		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 		break;
 	case COLOUR::Cyan:
 		ghostX = 12;
 		ghostY = 12;
 		DEFAULT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_CYAN;
+		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
 		break;
 	default:
 		break;
@@ -39,85 +43,91 @@ void Ghost::changeMode(MODE newMode) {
 	currentMode = newMode;
 }
 
-void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X]) {
-	// Move the ghost according to the colour of the ghost.
-	updatePossibleMovesCoordinates();
-	std::pair<int, int> bestMove = { ghostX, ghostY };
-	switch (currentMode) {
+void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X], double deltaTime) {
+    double speed = 1.0; // tiles per second
+    moveAccumulator += speed * deltaTime;
 
-		// CHASE
-	case MODE::Chase:
-		bestMove = chaseMove(pacmanX, pacmanY, grid);
-		// Count down time for chasing ghost, once at 0 reset to scatter mode.
-		chaseTimeLeft--;
-		if (chaseTimeLeft <= 0) {
-			changeMode(MODE::Scatter);
-			chaseTimeLeft = 0;
+    while (moveAccumulator >= 1.0) {
+        // Move the ghost according to the colour of the ghost.
+        updatePossibleMovesCoordinates();
+        std::pair<int, int> bestMove = { ghostX, ghostY };
+        switch (currentMode) {
+
+			// CHASE
+		case MODE::Chase:
+			bestMove = chaseMove(pacmanX, pacmanY, grid);
+			// Count down time for chasing ghost, once at 0 reset to scatter mode.
+			chaseTimeLeft--;
+			if (chaseTimeLeft <= 0) {
+				changeMode(MODE::Scatter);
+				chaseTimeLeft = 0;
+			}
+			break;
+
+			// FRIGHTENED
+		case MODE::Frightened:
+			// Move as frightened blue ghost
+			CURRENT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_BLUE_SCARED;
+			bestMove = frightenedMove(grid);
+
+			// Count down time for frightened ghost, once at 0 reset to scatter mode.
+			blueGhostTimeLeft--;
+			if (blueGhostTimeLeft <= 0) {
+				changeMode(MODE::Scatter);
+				blueGhostTimeLeft = 0;
+			}
+			break;
+
+			// SCATTER
+		case MODE::Scatter:
+			CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
+			bestMove = scatterMove(grid);
+			break;
+
+			// START MOVE TO OUTSIDE THE BOX
+		case MODE::Start:
+			bestMove = startMove(START_POSITION.first, START_POSITION.second, grid);
+			break;
+		default:
+			break;
 		}
-		break;
 
-		// FRIGHTENED
-	case MODE::Frightened:
-		// Move as frightened blue ghost
-		CURRENT_GHOST_TEXTURE = TextureHandler::ASSETS::GHOST_BLUE_SCARED;
-		bestMove = frightenedMove(grid);
-
-		// Count down time for frightened ghost, once at 0 reset to scatter mode.
-		blueGhostTimeLeft--;
-		if (blueGhostTimeLeft <= 0) {
-			changeMode(MODE::Scatter);
-			blueGhostTimeLeft = 0;
+		// Make sure that in case of hit with Pac-Man, that the position is left EMPTY.
+		if (ghostX == pacmanX && ghostY == pacmanY) {
+			currentPositionChar = Game::EMPTY;
 		}
-		break;
 
-		// SCATTER
-	case MODE::Scatter:
-		CURRENT_GHOST_TEXTURE = DEFAULT_GHOST_TEXTURE;
-		bestMove = scatterMove(grid);
-		break;
+		// Replace the old position with the char before the ghost entered the position.
+		grid[ghostY][ghostX] = currentPositionChar;
 
-		// START MOVE TO OUTSIDE THE BOX
-	case MODE::Start:
-		bestMove = startMove(START_POSITION.first, START_POSITION.second, grid);
-		break;
-	default:
-		break;
-	}
+		// Check the direction of the movement.
+		if (bestMove.first - ghostX > 0) {
+			wantedGhostDirection = Game::DIRECTION::Right;
+		} else if (bestMove.first - ghostX < 0) {
+			wantedGhostDirection = Game::DIRECTION::Left;
+		} else if (bestMove.second - ghostY > 0) {
+			wantedGhostDirection = Game::DIRECTION::Down;
+		} else if (bestMove.second - ghostY < 0) {
+			wantedGhostDirection = Game::DIRECTION::Up;
+		}
 
-	// Make sure that in case of hit with Pac-Man, that the position is left EMPTY.
-	if (ghostX == pacmanX && ghostY == pacmanY) {
-		currentPositionChar = Game::EMPTY;
-	}
+		if (wantedGhostDirection != currentGhostDirection) {
+			currentGhostDirection = wantedGhostDirection;
+		}
 
-	// Replace the old position with the char before the ghost entered the position.
-	grid[ghostY][ghostX] = currentPositionChar;
+		// Set the new ghost coordinates
+		ghostX = bestMove.first;
+		ghostY = bestMove.second;
 
-	// Check the direction of the movement.
-	if (bestMove.first - ghostX > 0) {
-		wantedGhostDirection = Game::DIRECTION::Right;
-	} else if (bestMove.first - ghostX < 0) {
-		wantedGhostDirection = Game::DIRECTION::Left;
-	} else if (bestMove.second - ghostY > 0) {
-		wantedGhostDirection = Game::DIRECTION::Down;
-	} else if (bestMove.second - ghostY < 0) {
-		wantedGhostDirection = Game::DIRECTION::Up;
-	}
+		ghostX = Game::checkIfChangeInSideX(ghostX);
 
-	if (wantedGhostDirection != currentGhostDirection) {
-		currentGhostDirection = wantedGhostDirection;
-	}
+		// Get the char of the position the ghost will move to.
+		currentPositionChar = grid[ghostY][ghostX];
+		// Update ghost's position
+		grid[ghostY][ghostX] = Game::GHOST_CHAR;
 
-	// Set the new ghost coordinates
-	ghostX = bestMove.first;
-	ghostY = bestMove.second;
-
-	ghostX = Game::checkIfChangeInSideX(ghostX);
-
-	// Get the char of the position the ghost will move to.
-	currentPositionChar = grid[ghostY][ghostX];
-	// Update ghost's position
-	grid[ghostY][ghostX] = Game::GHOST_CHAR;
-
+		moveAccumulator -= 1.0;
+    }
 }
 
 // Calculate Manhattan distance between two points

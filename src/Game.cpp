@@ -32,14 +32,14 @@ void Game::setupGame() {
 	}
 }
 
-void Game::playGame() {
+void Game::playGame(double deltaTime) {
 	
 		// Display the game grid
-		//displayGrid();
+		displayGrid();
 		displayGUIWindow();
 
 		// Move Pac-Man in the set direction if it's valid.
-		bool powerPelletHit = pacMan.movePacMan(grid);
+		bool powerPelletHit = pacMan.movePacMan(grid, deltaTime);
 		// Change ghosts movement to FRIGHTENED if Pac-Man hit a power pellet.
 		if (powerPelletHit) {
 			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
@@ -59,7 +59,7 @@ void Game::playGame() {
 			}
 
 			// MOVEMENT
-			ghost->moveGhost(pacMan.pacmanX, pacMan.pacmanY, grid);
+			ghost->moveGhost(pacMan.pacmanX, pacMan.pacmanY, grid, deltaTime);
 
 			// POST-GHOST MOVEMENT CHECK
 			gameOver = checkCollisionAndSearchRange(ghost);
@@ -109,44 +109,18 @@ static void SetColor(HANDLE hConsole, int textColor, int bgColor = 0) {
 void Game::displayGrid() const {
 	system("cls"); // Clear the console.
 
-	// Set the colour of the entire board to yellow, including Pac-Man and Ghosts.
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	//std::cout << "RED: " << ghostRed->modeEnumToString(ghostRed->currentMode) << std::endl;
+	//std::cout << "ORANGE: " << ghostOrange->modeEnumToString(ghostOrange->currentMode) << std::endl;
+	//std::cout << "PINK: " << ghostPink->modeEnumToString(ghostPink->currentMode) << std::endl;
+	//std::cout << "CYAN: " << ghostCyan->modeEnumToString(ghostCyan->currentMode) << std::endl;
 
-	for (int y = 0; y < GRID_Y; y++) {
-		for (int x = 0; x < GRID_X; x++) {
-			if (x == pacMan.pacmanX && y == pacMan.pacmanY) {
-				SetColor(hConsole, 14); // Yellow
-			} else if (x == ghostOrange->ghostX && y == ghostOrange->ghostY && ghostOrange->currentMode != MODE::Frightened) {
-				SetColor(hConsole, 12); // Orange
-			} else if (x == ghostRed->ghostX && y == ghostRed->ghostY && ghostRed->currentMode != MODE::Frightened) {
-				SetColor(hConsole, 4); // Red
-			} else if (x == ghostPink->ghostX && y == ghostPink->ghostY && ghostPink->currentMode != MODE::Frightened) {
-				SetColor(hConsole, 13); // Pink
-			} else if (x == ghostCyan->ghostX && y == ghostCyan->ghostY && ghostCyan->currentMode != MODE::Frightened) {
-				SetColor(hConsole, 11); // Cyan
-			} else if (grid[y][x] == '.' || grid[y][x] == '*') {
-				SetColor(hConsole, 14); // Yellow
-			} else {
-				SetColor(hConsole, 9); // Blue
-			}
-			std::cout << Game::grid[y][x];
-		}
-		//std::cout << "% " << y;
-
-		std::cout << std::endl;
-
-	}
-	SetColor(hConsole, 7); // Default colour.
-
-	//std::cout << std::endl << "PELLETS LEFT: " << numberOfPelletsRemaining << std::endl;
-	
 	std::cout << "SCORE: " << score << std::endl;
 
 }
 
 // Display the game board GUI
 void Game::displayGUIWindow() const {
-	system("cls"); // Clear the console.
+	//system("cls"); // Clear the console.
 
 	gameGUI.drawBackground();
 
@@ -177,7 +151,7 @@ void Game::displayGUIWindow() const {
 
 
 	}
-	std::cout << "SCORE: " << score << std::endl;
+	//std::cout << "SCORE: " << score << std::endl;
 
 }
 
@@ -306,11 +280,22 @@ void Game::UserInputThread() {
 void Game::RenderingThread() {
 	setupGame();
 
+	auto lastFrameTime = std::chrono::high_resolution_clock::now();
+
 	while (g_run && !gameOver) {
-		playGame();
-		std::this_thread::sleep_for(std::chrono::duration<double>(FRAME_DURATION));
+		auto currentFrameTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
+		lastFrameTime = currentFrameTime;
+
+		playGame(deltaTime.count());
+
+		// Frame limiting (optional)
+		double sleepTime = FRAME_DURATION - deltaTime.count();
+		if (sleepTime > 0) {
+			std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
+		}
 	}
-	g_run = false; // Block further input and rendering.
+	g_run = false;
 	showGameOverScreen();
 
 }
