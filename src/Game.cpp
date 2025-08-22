@@ -319,10 +319,4 @@ void Game::RenderingThread() {
 Game::Game(GUI& gui) :
 	gameGUI(gui),
 	pacMan() {
-	std::thread inputThread(&Game::UserInputThread, this);
-	std::thread renderThread(&Game::RenderingThread, this);
-
-	// Wait for threads to finish
-	inputThread.join();
-	renderThread.join();
 }
