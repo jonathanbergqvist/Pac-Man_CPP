@@ -11,11 +11,18 @@ endif()
 
 project ("Pac-Man_CPP")
 
+find_package(SFML COMPONENTS Network Graphics Window Audio System CONFIG REQUIRED)
+
 # Add source to this project's executable.
-add_executable (Pac-Man_CPP "src/Main.cpp" "src/Main.h" "src/Game.cpp" "src/Game.h" "src/Pacman.cpp" "src/Pacman.h" "src/Ghost.cpp" "src/Ghost.h")
+add_executable (Pac-Man_CPP "src/Main.cpp" "src/Main.h" "src/Game.cpp" "src/Game.h" "src/Pacman.cpp" "src/Pacman.h" "src/Ghost.cpp" "src/Ghost.h" "src/GUI.cpp" "src/GUI.h" "src/TextureHandler.h" "src/TextureHandler.cpp")
+
+target_link_libraries(Pac-Man_CPP PRIVATE SFML::Network SFML::Graphics SFML::Window SFML::Audio SFML::System)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Pac-Man_CPP PROPERTY CXX_STANDARD 20)
 endif()
+
+# Add the Images folder to the Cmake build folder
+file(COPY ${CMAKE_SOURCE_DIR}/Images DESTINATION ${CMAKE_BINARY_DIR})
 
 # TODO: Add tests and install targets if needed.
