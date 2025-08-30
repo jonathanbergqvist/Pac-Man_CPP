@@ -19,6 +19,8 @@ This project uses vcpkg for package management and CMake for building.
   ]
 }
 ```
+I installed SFML and its dependencies with `vcpkg install sfml:x64-mingw-dynamic`, SFML and its dependencies are listed in `vcpkg.json`.
+
 
 ## References
 - [vcpkg Documentation](https://vcpkg.io/en/index.html)
