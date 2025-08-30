@@ -1,13 +1,13 @@
-#include "Game.h"
+#include "GameLogic.h"
 #include "Ghost.h"
 
-Game::DIRECTION currentGhostDirection;
-Game::DIRECTION wantedGhostDirection;
+GameLogic::DIRECTION currentGhostDirection;
+GameLogic::DIRECTION wantedGhostDirection;
 
 Ghost::Ghost(COLOUR colour) : ghostColour(colour) {
 	// Constructor implementation for colored ghost
 	currentMode = MODE::Start;
-	currentPositionChar = Game::EMPTY;
+	currentPositionChar = GameLogic::EMPTY;
 
 	switch (ghostColour) {
 	case COLOUR::Orange:
@@ -94,7 +94,7 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X], doubl
 
 		// Make sure that in case of hit with Pac-Man, that the position is left EMPTY.
 		if (ghostX == pacmanX && ghostY == pacmanY) {
-			currentPositionChar = Game::EMPTY;
+			currentPositionChar = GameLogic::EMPTY;
 		}
 
 		// Replace the old position with the char before the ghost entered the position.
@@ -102,13 +102,13 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X], doubl
 
 		// Check the direction of the movement.
 		if (bestMove.first - ghostX > 0) {
-			wantedGhostDirection = Game::DIRECTION::Right;
+			wantedGhostDirection = GameLogic::DIRECTION::Right;
 		} else if (bestMove.first - ghostX < 0) {
-			wantedGhostDirection = Game::DIRECTION::Left;
+			wantedGhostDirection = GameLogic::DIRECTION::Left;
 		} else if (bestMove.second - ghostY > 0) {
-			wantedGhostDirection = Game::DIRECTION::Down;
+			wantedGhostDirection = GameLogic::DIRECTION::Down;
 		} else if (bestMove.second - ghostY < 0) {
-			wantedGhostDirection = Game::DIRECTION::Up;
+			wantedGhostDirection = GameLogic::DIRECTION::Up;
 		}
 
 		if (wantedGhostDirection != currentGhostDirection) {
@@ -119,12 +119,12 @@ void Ghost::moveGhost(int pacmanX, int pacmanY, char grid[GRID_Y][GRID_X], doubl
 		ghostX = bestMove.first;
 		ghostY = bestMove.second;
 
-		ghostX = Game::checkIfChangeInSideX(ghostX);
+		ghostX = GameLogic::checkIfChangeInSideX(ghostX);
 
 		// Get the char of the position the ghost will move to.
 		currentPositionChar = grid[ghostY][ghostX];
 		// Update ghost's position
-		grid[ghostY][ghostX] = Game::GHOST_CHAR;
+		grid[ghostY][ghostX] = GameLogic::GHOST_CHAR;
 
 		moveAccumulator -= 1.0;
     }
@@ -151,25 +151,25 @@ std::pair<int, int> Ghost::scatterMove(char grid[GRID_Y][GRID_X]) {
 	int randomIndex;
 
 	// Check if the current direction is valid.
-	if (currentGhostDirection == Game::DIRECTION::Up) {
+	if (currentGhostDirection == GameLogic::DIRECTION::Up) {
 		move = POSSIBLE_MOVES[3];
-		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirection == Game::DIRECTION::Down) {
+		validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirection == GameLogic::DIRECTION::Down) {
 		move = POSSIBLE_MOVES[2];
-		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirection == Game::DIRECTION::Left) {
+		validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirection == GameLogic::DIRECTION::Left) {
 		move = POSSIBLE_MOVES[1];
-		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
-	} else if (currentGhostDirection == Game::DIRECTION::Right) {
+		validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+	} else if (currentGhostDirection == GameLogic::DIRECTION::Right) {
 		move = POSSIBLE_MOVES[0];
-		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+		validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
 	}
 
 	// If the current direction isn't valid, select a new valid one at random.
 	while (!validMove) {
 		randomIndex = rand() % POSSIBLE_MOVES.size(); // Get a random index
 		move = POSSIBLE_MOVES[randomIndex];
-		validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+		validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
 	}
 	return move; // Return the random move
 }
@@ -210,7 +210,7 @@ std::pair<int, int> Ghost::chaseMove(int targetX, int targetY, char grid[GRID_Y]
 	for (const auto& move : POSSIBLE_MOVES) {
 		int heuristic = manhattanDistance(move.first, move.second, targetX, targetY);
 		if (heuristic < min_heuristic) {
-			bool validMove = Game::checkValidNonStartGhostMovement(grid[move.second][move.first]);
+			bool validMove = GameLogic::checkValidNonStartGhostMovement(grid[move.second][move.first]);
 			if (validMove) {
 				min_heuristic = heuristic;
 				bestMove = move;
@@ -229,7 +229,7 @@ std::pair<int, int> Ghost::startMove(int targetX, int targetY, char grid[GRID_Y]
 	for (const auto& move : POSSIBLE_MOVES) {
 		int heuristic = manhattanDistance(move.first, move.second, targetX, targetY);
 		if (heuristic < min_heuristic) {
-			bool validMove = Game::checkValidStartGhostMovement(grid[move.second][move.first]);
+			bool validMove = GameLogic::checkValidStartGhostMovement(grid[move.second][move.first]);
 			if (validMove) {
 				min_heuristic = heuristic;
 				bestMove = move;

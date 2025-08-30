@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/VideoMode.hpp>
 
 #include "TextureHandler.h"
 #include "Pacman.h"
@@ -12,8 +11,6 @@ public:
 
 	GUI(TextureHandler& textureHandler);
 
-	//void drawFrames(TextureHandler& textures);
-
 	TextureHandler& getTextures();
 
 	void drawBackground();
@@ -21,10 +18,6 @@ public:
 	void drawPelletLarge(int positionX, int positionY);
 	void drawPacMan(PacMan pacman);
 	void drawSingleGhost(Ghost& ghost);
-
-
-
-private:
 	sf::RenderWindow window;
 
 };

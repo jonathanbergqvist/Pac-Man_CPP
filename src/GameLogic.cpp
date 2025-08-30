@@ -1,42 +1,62 @@
 #define NOMINMAX // To avoid min/max macros from windows.h
 
 #include <iostream>
-#include <windows.h> // For colouring the terminal characters
 #include <thread>
-#include <atomic>
-#include <string>
 
-#include "Game.h"
+#include "GameLogic.h"
 #include "Ghost.h"
 
-int Game::numberOfPelletsRemaining;
-int Game::score = 0;
+int GameLogic::numberOfPelletsRemaining;
+int GameLogic::score = 0;
 
 bool powerPelletHit = false;
-bool Game::gameOver = false;
+bool GameLogic::gameOver = false;
 
 const double TARGET_FPS = 60.0;
 const double FRAME_DURATION = 1.0 / TARGET_FPS;
 
 
-void Game::setupGame() {
+void GameLogic::setupGame() {
 	// Initial placement of Pac-Man
-	grid[pacMan.pacmanY][pacMan.pacmanX] = Game::PACMAN_CHAR;
+	grid[pacMan.pacmanY][pacMan.pacmanX] = GameLogic::PACMAN_CHAR;
 
 	// Count the total number of pellets on the game grid, including the ones covered by the ghosts. PacMan doesn't cover a pellet!
-	Game::numberOfPelletsRemaining = countCharInGameGrid(grid);
+	GameLogic::numberOfPelletsRemaining = countCharInGameGrid(grid);
 
 	// Print the initial ghosts on the map.
 	for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
-		grid[ghost->ghostY][ghost->ghostX] = Game::GHOST_CHAR;
+		grid[ghost->ghostY][ghost->ghostX] = GameLogic::GHOST_CHAR;
+	}
+
+	auto lastFrameTime = std::chrono::high_resolution_clock::now();
+	while (!gameOver) {
+
+		auto currentFrameTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
+		lastFrameTime = currentFrameTime;
+
+		handleGameFlow(deltaTime.count());
+
+		// Frame limiting (optional)
+		double sleepTime = FRAME_DURATION - deltaTime.count();
+		if (sleepTime > 0) {
+			std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
+		}
 	}
 }
 
-void Game::playGame(double deltaTime) {
-	
-		// Display the game grid
-		displayGrid();
-		displayGUIWindow();
+void GameLogic::handleGameFlow(double deltaTime) {
+
+	while (const std::optional event = gameGUI.window.pollEvent()) {
+		// "close requested" event: we close the window
+		if (event->is<sf::Event::Closed>()) {
+			gameGUI.window.close();
+		}
+
+		pacMan.changePacManDirection(grid);
+
+		// Display the game
+		displayGameContent();
 
 		// Move Pac-Man in the set direction if it's valid.
 		bool powerPelletHit = pacMan.movePacMan(grid, deltaTime);
@@ -45,7 +65,7 @@ void Game::playGame(double deltaTime) {
 			for (std::shared_ptr<Ghost> ghost : ghostsPtr) {
 				ghost->changeMode(MODE::Frightened);
 				ghost->chaseTimeLeft = 0; // Remove eventual chase time.
-				ghost->blueGhostTimeLeft = Game::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
+				ghost->blueGhostTimeLeft = GameLogic::BLUE_GHOST_TIME_LEFT; // Moves left for the ghost as blue.
 			}
 		}
 
@@ -66,16 +86,21 @@ void Game::playGame(double deltaTime) {
 			if (gameOver) {
 				break;
 			}
-			
+
 		}
 
 		// Check if the board is out of pellets.
 		if (!gameOver) {
 			gameOver = checkIfBoardIsComplete();
 		}
+
+	}
+
+	gameGUI.window.display();
+	//gameGUI.window.clear(sf::Color::Black);
 }
 
-bool Game::checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost) {
+bool GameLogic::checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost) {
 	bool gameOver = false;
 
 	if (ghost->ghostX == START_POSITION.first && ghost-> ghostY == START_POSITION.second && ghost->currentMode == MODE::Start) {
@@ -94,33 +119,14 @@ bool Game::checkCollisionAndSearchRange(std::shared_ptr<Ghost> ghost) {
 	// Check if Pac-Man is within allowed range post-movement.
 	if (checkIfPacManWithinRange(ghost) && ghost->currentMode == MODE::Scatter) {
 		ghost->changeMode(MODE::Chase);
-		ghost->chaseTimeLeft = Game::REGULAR_GHOST_CHASE_TIME;
+		ghost->chaseTimeLeft = GameLogic::REGULAR_GHOST_CHASE_TIME;
 	}
 
 	return gameOver;
 }
 
-// Set the colour of the terminal text.
-static void SetColor(HANDLE hConsole, int textColor, int bgColor = 0) {
-	SetConsoleTextAttribute(hConsole, (WORD)((bgColor << 4) | textColor));
-}
-
-// Display the game board grid
-void Game::displayGrid() const {
-	system("cls"); // Clear the console.
-
-	//std::cout << "RED: " << ghostRed->modeEnumToString(ghostRed->currentMode) << std::endl;
-	//std::cout << "ORANGE: " << ghostOrange->modeEnumToString(ghostOrange->currentMode) << std::endl;
-	//std::cout << "PINK: " << ghostPink->modeEnumToString(ghostPink->currentMode) << std::endl;
-	//std::cout << "CYAN: " << ghostCyan->modeEnumToString(ghostCyan->currentMode) << std::endl;
-
-	std::cout << "SCORE: " << score << std::endl;
-
-}
-
 // Display the game board GUI
-void Game::displayGUIWindow() const {
-	//system("cls"); // Clear the console.
+void GameLogic::displayGameContent() const {
 
 	gameGUI.drawBackground();
 
@@ -148,31 +154,22 @@ void Game::displayGUIWindow() const {
 				gameGUI.drawPelletLarge(x, y);
 			}
 		}
-
-
 	}
-	//std::cout << "SCORE: " << score << std::endl;
-
 }
 
-void Game::showGameOverScreen() const {
-	//displayGrid();
-	std::cout << "GAME OVER" << std::endl;
+bool GameLogic::checkValidPacManMovement(char wantedLocation) {
+	return wantedLocation != GameLogic::WALL && wantedLocation != GameLogic::GHOST_WALL;
 }
 
-bool Game::checkValidPacManMovement(char wantedLocation) {
-	return wantedLocation != Game::WALL && wantedLocation != Game::GHOST_WALL;
+bool GameLogic::checkValidStartGhostMovement(char wantedLocation) {
+	return wantedLocation != GameLogic::WALL && wantedLocation != GameLogic::GHOST_CHAR;
 }
 
-bool Game::checkValidStartGhostMovement(char wantedLocation) {
-	return wantedLocation != Game::WALL && wantedLocation != Game::GHOST_CHAR;
+bool GameLogic::checkValidNonStartGhostMovement(char wantedLocation) {
+	return wantedLocation != GameLogic::WALL && wantedLocation != GameLogic::GHOST_WALL && wantedLocation != GameLogic::GHOST_CHAR;
 }
 
-bool Game::checkValidNonStartGhostMovement(char wantedLocation) {
-	return wantedLocation != Game::WALL && wantedLocation != Game::GHOST_WALL && wantedLocation != Game::GHOST_CHAR;
-}
-
-int Game::checkIfChangeInSideX(int posX) {
+int GameLogic::checkIfChangeInSideX(int posX) {
 	if (posX == -1) {
 		posX = GRID_X - 2;
 	} else if (posX == GRID_X - 1) {
@@ -182,7 +179,7 @@ int Game::checkIfChangeInSideX(int posX) {
 	return posX;
 }
 
-int Game::countCharInGameGrid(char grid[GRID_Y][GRID_X]) {
+int GameLogic::countCharInGameGrid(char grid[GRID_Y][GRID_X]) {
 	int count = 0;
 	for (int y = 0; y < GRID_Y; y++) {
 		for (int x = 0; x < GRID_X; x++) {
@@ -194,7 +191,7 @@ int Game::countCharInGameGrid(char grid[GRID_Y][GRID_X]) {
 	return count;
 }
 
-bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
+bool GameLogic::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
 	int g_x = ghost->ghostX;
 	int g_y = ghost->ghostY;
 
@@ -202,22 +199,22 @@ bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
 	if (g_x >= 0 && g_x < GRID_X && g_y >= 0 && g_y < GRID_Y) {
 		// Check Up
 		for (int y = g_y - 1; y >= std::max(0, g_y - PACMAN_SEARCH_RANGE); y--) {
-			if (grid[y][g_x] == Game::PACMAN_CHAR) return true;
+			if (grid[y][g_x] == GameLogic::PACMAN_CHAR) return true;
 			if (grid[y][g_x] == WALL) break;
 		}
 		// Check Down
 		for (int y = g_y + 1; y <= std::min(GRID_Y - 1, g_y + PACMAN_SEARCH_RANGE); y++) {
-			if (grid[y][g_x] == Game::PACMAN_CHAR) return true;
+			if (grid[y][g_x] == GameLogic::PACMAN_CHAR) return true;
 			if (grid[y][g_x] == WALL) break;
 		}
 		// Check Left
 		for (int x = g_x - 1; x >= std::max(0, g_x - PACMAN_SEARCH_RANGE); x--) {
-			if (grid[g_y][x] == Game::PACMAN_CHAR) return true;
+			if (grid[g_y][x] == GameLogic::PACMAN_CHAR) return true;
 			if (grid[g_y][x] == WALL) break;
 		}
 		// Check Right
 		for (int x = g_x + 1; x <= std::min(GRID_X - 1, g_x + PACMAN_SEARCH_RANGE); x++) {
-			if (grid[g_y][x] == Game::PACMAN_CHAR) return true;
+			if (grid[g_y][x] == GameLogic::PACMAN_CHAR) return true;
 			if (grid[g_y][x] == WALL) break;
 		}
 		return false;
@@ -225,7 +222,7 @@ bool Game::checkIfPacManWithinRange(std::shared_ptr<Ghost> ghost) const {
 	return false;
 }
 
-bool Game::checkIfBoardIsComplete() const {
+bool GameLogic::checkIfBoardIsComplete() const {
 	if (numberOfPelletsRemaining == 0) {
 		return true;
 	} else {
@@ -233,7 +230,7 @@ bool Game::checkIfBoardIsComplete() const {
 	}
 }
 
-bool Game::checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const {
+bool GameLogic::checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const {
 	if (pacMan.pacmanX == ghost->ghostX && pacMan.pacmanY == ghost->ghostY && ghost->currentMode != MODE::Frightened) {
 		return true;
 	} else {
@@ -241,7 +238,7 @@ bool Game::checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) cons
 	}
 }
 
-void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
+void GameLogic::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
 	if (pacMan.pacmanX == ghost->ghostX && pacMan.pacmanY == ghost->ghostY && ghost->currentMode == MODE::Frightened) {
 		// Ghost hit will be moved to the middle of the screen and returned to scatter mode.
 		score += BLUE_GHOST_SCORE; // Score for hitting blue ghost.
@@ -262,46 +259,13 @@ void Game::checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost) {
 		ghost->changeMode(MODE::Start);
 		grid[ghost->ghostY][ghost->ghostX] = GHOST_CHAR;
 
-		grid[pacMan.pacmanY][pacMan.pacmanX] = Game::PACMAN_CHAR;
+		grid[pacMan.pacmanY][pacMan.pacmanX] = GameLogic::PACMAN_CHAR;
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-std::atomic_bool g_run(true); // Shared flag for both threads
-
-void Game::UserInputThread() {
-	std::string input;
-	while (g_run) {
-		pacMan.changePacManDirection(grid);
-	}
-}
-
-void Game::RenderingThread() {
-	setupGame();
-
-	auto lastFrameTime = std::chrono::high_resolution_clock::now();
-
-	while (g_run && !gameOver) {
-		auto currentFrameTime = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
-		lastFrameTime = currentFrameTime;
-
-		playGame(deltaTime.count());
-
-		// Frame limiting (optional)
-		double sleepTime = FRAME_DURATION - deltaTime.count();
-		if (sleepTime > 0) {
-			std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
-		}
-	}
-	g_run = false;
-	showGameOverScreen();
-
-}
 
 // Constructor implementation
-Game::Game(GUI& gui) :
+GameLogic::GameLogic(GUI& gui) :
 	gameGUI(gui),
 	pacMan() {
 }

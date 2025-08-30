@@ -1,5 +1,4 @@
 #pragma once
-
 #include <memory>
 #include <vector>
 
@@ -8,7 +7,7 @@
 #include "Ghost.h"
 #include "GUI.h"
 
-class Game {
+class GameLogic {
 	char grid[GRID_Y][GRID_X] = {
 	"#############################",
 	"#............###............#",
@@ -48,10 +47,7 @@ class Game {
 	static const int REGULAR_GHOST_CHASE_TIME = 30; // Cells
 	static const int PACMAN_SEARCH_RANGE = 5; // 5 free non-wall columns/rows.
 
-
-	void showGameOverScreen() const;
-	void setupGame();
-	void playGame(double deltaTime);
+	void handleGameFlow(double deltaTime);
 	bool checkIfBoardIsComplete() const;
 	bool checkIfPacManRegularGhostCollision(std::shared_ptr<Ghost> ghost) const;
 	void checkIfPacManBlueGhostCollision(std::shared_ptr<Ghost> ghost);
@@ -61,13 +57,11 @@ class Game {
 public:
 	enum class DIRECTION { Up, Down, Left, Right };
 
-	Game(GUI& gameGUI);
+	GameLogic(GUI& gameGUI);
 
-	void UserInputThread();
-	void RenderingThread();
+	void setupGame();
 
-	void displayGrid() const;
-	void displayGUIWindow() const;
+	void displayGameContent() const;
 
 	static bool checkValidPacManMovement(char wantedLocation);
 	static bool checkValidStartGhostMovement(char wantedLocation);
@@ -101,8 +95,6 @@ public:
 		ghostPink,
 		ghostCyan
 	};
-
-private:
 	GUI& gameGUI;
 
 };
